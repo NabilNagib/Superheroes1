@@ -10,15 +10,13 @@ class Hero(db.Model):
     super_name = db.Column(db.String(50), nullable=False)
     hero_powers = relationship('HeroPower', back_populates='hero', cascade='all, delete')
 
-    def to_dict(self, include_powers=False):
-        hero_dict = {
+    def to_dict(self):
+        return {
             'id': self.id,
             'name': self.name,
             'super_name': self.super_name
         }
-        if include_powers:
-            hero_dict['hero_powers'] = [hp.to_dict() for hp in self.hero_powers]
-        return hero_dict
+
 
 class Power(db.Model):
     __tablename__ = 'powers'
@@ -43,22 +41,12 @@ class HeroPower(db.Model):
     hero = relationship('Hero', back_populates='hero_powers')
     power = relationship('Power', back_populates='hero_powers')
 
-    @validates('strength')
+    @validates("strength")
     def validate_strength(self, key, strength):
-        assert strength in ['Strong', 'Weak', 'Average'], 'Strength must be one of: Strong, Weak, Average'
+        strengths = ["Strong", "Weak", "Average"]    
+        if strength not in strengths:
+            raise ValueError("Strength should be 'Strong', 'Average' or 'Weak'")
         return strength
-
-    @validates('power_id')
-    def validate_power_id(self, key, power_id):
-        power = Power.query.get(power_id)
-        assert power, 'Power not found'
-        return power_id
-
-    @validates('hero_id')
-    def validate_hero_id(self, key, hero_id):
-        hero = Hero.query.get(hero_id)
-        assert hero, 'Hero not found'
-        return hero_id
 
     def to_dict(self):
         return {

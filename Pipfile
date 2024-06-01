@@ -6,7 +6,9 @@ name = "pypi"
 [packages]
 sqlalchemy = "*"
 flask = "*"
-pytest = "*"
+sqlalchemy-serializer = "*"
+"sqlalchemy.orm" = "*"
+flask-sqlalchemy = "*"
 
 [dev-packages]
 

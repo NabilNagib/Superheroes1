@@ -1,25 +1,31 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request,  make_response
 from models import db, Hero, Power, HeroPower
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/superheroes.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///superheroes.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-# Ensure the database is created if it doesn't exist
 with app.app_context():
     db.create_all()
+
+
+
+@app.route('/')
+def home():
+    return 'This is an API for tracking heroes and their superpowers.'
 
 @app.route('/heroes', methods=['GET'])
 def get_heroes():
     heroes = Hero.query.all()
-    return jsonify([hero.to_dict() for hero in heroes])
+    return jsonify([hero.to_dict() for hero in heroes]), 200
 
 @app.route('/heroes/<int:id>', methods=['GET'])
 def get_hero(id):
     hero = Hero.query.get(id)
     if not hero:
         return jsonify({'error': 'Hero not found'}), 404
-    return jsonify(hero.to_dict(include_powers=True))
+    return jsonify(hero.to_dict())
 
 @app.route('/powers', methods=['GET'])
 def get_powers():
@@ -35,13 +41,14 @@ def get_power(id):
 
 @app.route('/powers/<int:id>', methods=['PATCH'])
 def update_power(id):
-    print(f"Received PATCH request for power ID: {id}")
     power = Power.query.get(id)
     if not power:
         return jsonify({'error': 'Power not found'}), 404
     
+    if request.content_type != 'application/json':
+        return jsonify({'error': 'Content-Type must be application/json'}), 415
+    
     data = request.json
-    print(f"Received data: {data}")
     if 'description' in data:
         description = data['description']
         if len(description) < 20:
@@ -62,5 +69,6 @@ def add_hero_power():
     except AssertionError as e:
         return jsonify({'errors': [str(e)]}), 400
 
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5000, debug=True)

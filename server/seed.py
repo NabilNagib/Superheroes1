@@ -4,14 +4,11 @@ from models import db, Hero, Power, HeroPower
 
 if __name__ == '__main__':
     with app.app_context():
-        print("Creating tables...")
-        db.create_all()  # Ensure tables are created
-
         print("Clearing db...")
+        Hero.query.delete()
         HeroPower.query.delete()
         Power.query.delete()
-        Hero.query.delete()
-        db.session.commit()  # Commit changes after clearing the tables
+        db.create_all()
 
         print("Seeding powers...")
         powers = [
@@ -22,7 +19,7 @@ if __name__ == '__main__':
         ]
 
         db.session.add_all(powers)
-        db.session.commit()  # Commit changes after adding powers
+        db.session.commit()
 
         print("Seeding heroes...")
         heroes = [
@@ -39,7 +36,7 @@ if __name__ == '__main__':
         ]
 
         db.session.add_all(heroes)
-        db.session.commit()  # Commit changes after adding heroes
+        db.session.commit() 
 
         print("Adding powers to heroes...")
         strengths = ["Strong", "Weak", "Average"]
@@ -50,6 +47,5 @@ if __name__ == '__main__':
                 HeroPower(hero=hero, power=power, strength=rc(strengths))
             )
         db.session.add_all(hero_powers)
-        db.session.commit()  # Commit changes after adding hero powers
-
+        db.session.commit()
         print("Done seeding!")
